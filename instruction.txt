@@ -1,19 +1,17 @@
-import time
+1. roscore
+
+
+
+
+
+2. gamepad.py
 import pygame
-import socketio
 import rospy
 from std_msgs.msg import Float64MultiArray,String
 from flask_cors import CORS
 from flask import Flask,jsonify,request
 from flask_socketio import SocketIO, emit
-sio = socketio.Client()
 
-# sio.connect('http://192.168.1.111:5476')
-sio.connect('http://192.168.43.17:5476')
-
-sio.on('connect', lambda: print('Connected to server'))
-sio.on('disconnect', lambda: print('Disconnected from server'))
-sio.on('rover', lambda data: print(data.message))
 
 waypoints = [] 
 
@@ -173,8 +171,7 @@ def joystick():
         msg.data = ','.join([str(left_stick_x), str(left_stick_y), str(right_stick_x), str(right_stick_y), str(current_buttons[0]), str(current_buttons[1]), str(current_buttons[2]), str(current_buttons[3]), str(current_buttons[4]), str(current_buttons[5]), str(current_buttons[6]), str(current_buttons[7]), str(current_buttons[8]), str(current_buttons[9]), str(current_buttons[10]), str(DPad_left), str(DPad_right), str(DPad_up), str(DPad_down), str(LT), str(RT)])
         # print(msg.data)
         pub.publish(str(left_motor)+","+str(right_motor))
-        sio.emit('joystick_data', str(left_motor)+","+str(right_motor))
-        time.sleep(0.1)
+        
         rate.sleep()
 
     
@@ -184,3 +181,44 @@ if __name__ == "__main__":
 
 
 # [leftX,leftY,rightX,rightY,B0,B1,B2,B3,B4,B5,B6,B7,B8,B9,B10,DL,DR,DU,DD,LT,RT]
+
+
+
+
+
+
+
+
+
+3.  client.py
+import socketio
+import rospy
+from std_msgs.msg import String
+sio = socketio.Client()
+rospy.init_node('socket_listen', anonymous=True)
+
+@sio.on('connect')
+def on_connect():
+    print('Connected to server')
+
+@sio.on('disconnect')
+def on_disconnect():
+    print('Disconnected from server')
+
+# @sio.on('joystick_data')
+# def on_custom_event(data):
+#     lst = data.split(',')
+#     pub.publish("["+str(lst[0])+","+str(lst[1])+"]")
+#     print(lst)
+
+sio.connect('http://192.168.1.111:8001')
+
+sio.emit('zavier', {'data': 'Hello from client'})
+def joystick_callback(data):
+    joystick_data = data.data
+    sio.emit('joystick_data', joystick_data)
+rospy.Subscriber('joystick', String, joystick_callback)
+
+
+# Keep the script running until manually interrupted
+sio.wait()

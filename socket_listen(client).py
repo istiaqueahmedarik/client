@@ -18,7 +18,9 @@ def on_disconnect():
 #     pub.publish("["+str(lst[0])+","+str(lst[1])+"]")
 #     print(lst)
 
-sio.connect('http://192.168.1.111:8001')
+sio.connect('http://192.168.1.111:5476')
+# sio.connect('http://192.168.43.17:5476')
+
 
 sio.emit('zavier', {'data': 'Hello from client'})
 def joystick_callback(data):
