@@ -69,8 +69,8 @@ void setup()
 
 void loop()
 {
-    vals.publish(&vl);
-    pub.publish(&fl);
+    // vals.publish(&vl);
+    // pub.publish(&fl);
     nh.spinOnce();
     // Add additional code here if needed
 }
