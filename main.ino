@@ -1,3 +1,5 @@
+
+
 #include <ros.h>
 #include <std_msgs/String.h>
 #include <std_msgs/Int64.h>
@@ -25,7 +27,7 @@ void joystickCallback(const std_msgs::String &msg)
 
     std::string input = msg.data;
     std::vector<int> arr;
-    std::istringstream iss(input); // Remove the enclosing brackets
+    std::istringstream iss(input.substr(1, input.length() - 2)); // Remove the enclosing brackets
 
     int num;
     char delimiter;
