@@ -16,12 +16,6 @@ SabertoothSimplified ST;
 #include <sstream>
 #include <vector>
 ros::NodeHandle nh;
-std_msgs::String fl;
-std_msgs::String vstate;
-std_msgs::String pxstate;
-ros::Publisher pub("JA", &fl);
-std_msgs::Float64 vl;
-ros::Publisher vals("vals", &vl);
 
 // Callback function to handle incoming joystick messages
 void joystickCallback(const std_msgs::String &msg)
@@ -29,11 +23,8 @@ void joystickCallback(const std_msgs::String &msg)
 
     // Access the joystick data from the message
 
-    digitalWrite(13, HIGH - digitalRead(13));
-
-    fl.data = msg.data;
     std::string input = msg.data;
-    std::vector<float> arr;
+    std::vector<int> arr;
     std::istringstream iss(input); // Remove the enclosing brackets
 
     int num;
@@ -47,12 +38,10 @@ void joystickCallback(const std_msgs::String &msg)
     // float yu = arr[3];
     // float yl = arr[2];
     // // Set motor 1 to move forward at full speed
-    // ST.motor(MOTOR1, yu);
+    ST.motor(MOTOR1, arr[0]);
 
     // // Set motor 2 to move backward at full speed
-    // ST.motor(MOTOR2, yl);
-    vl.data = yu;
-    pub.publish(&msg);
+    ST.motor(MOTOR2, arr[1]);
 
     // Publish the new message
     while (!nh.connected())
@@ -60,36 +49,19 @@ void joystickCallback(const std_msgs::String &msg)
         nh.spinOnce();
     }
 }
-void pxstateCallback(const std_msgs::String &msg)
-{
-    fl.data = msg.data;
-    std::string input = msg.data;
-    std::vector<int> arr;
-    std::istringstream iss(input.substr(1, input.length() - 2)); // Remove the enclosing brackets
 
-    int num;
-    char delimiter;
-    while (iss >> num)
-    {
-        arr.push_back(num);
-        iss >> delimiter;
-    }
-}
-void vstateCallback(const std_msgs::String &msg)
-{
-}
 ros::Subscriber<std_msgs::String> joystickSub("joystick", &joystickCallback);
-ros::Subscriber<std_msgs::String> pxstateSub("pxstate", &pxstateCallback);
-ros::Subscriber<std_msgs::String> vstateSub("vstate", &vstateCallback);
+// ros::Subscriber<std_msgs::String> pxstateSub("pxstate", &pxstateCallback);
+// ros::Subscriber<std_msgs::String> vstateSub("vstate", &vstateCallback);
 
 void setup()
 {
     nh.initNode();
     nh.subscribe(joystickSub);
-    nh.subscribe(pxstateSub);
-    nh.subscribe(vstateSub);
-    nh.advertise(vals);
-    nh.advertise(pub);
+    // nh.subscribe(pxstateSub);
+    // nh.subscribe(vstateSub);
+    // nh.advertise(vals);
+    // nh.advertise(pub);
     SabertoothTXPinSerial.begin(9600);
 }
 

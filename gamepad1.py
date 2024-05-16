@@ -9,11 +9,11 @@ from flask_socketio import SocketIO, emit
 sio = socketio.Client()
 
 # sio.connect('http://192.168.1.111:5476')
-sio.connect('http://192.168.43.17:5476')
+sio.connect('http://192.168.13.34:5476')
 
-sio.on('connect', lambda: print('Connected to server'))
-sio.on('disconnect', lambda: print('Disconnected from server'))
-sio.on('rover', lambda data: print(data.message))
+# sio.on('connect', lambda: print('Connected to server'))
+# sio.on('disconnect', lambda: print('Disconnected from server'))
+# sio.on('rover', lambda data: print(data.message))
 
 waypoints = [] 
 

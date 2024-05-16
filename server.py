@@ -113,18 +113,30 @@ def rc_out_callback(msg):
         'message': 'Px4 is working!',
     })
     channels = msg.channels
-    val1 = int(channels[0])
+    servo1 = channels[0]
+    servo2 = channels[1]
+    left_motor = 1500 + (servo1-1500)
+    right_motor = 1500 + (servo2-1500)
+    if(left_motor>1500):
+        diff = left_motor-1500
+        left_motor = 1500-diff
+    else:
+        diff = 1500-left_motor
+        left_motor = 1500+diff
+    if(right_motor>1500):
+        diff = right_motor-1500
+        right_motor = 1500-diff
+    else:
+        diff = 1500-right_motor
+        right_motor = 1500+diff
     
-    val2 = int(channels[1])
-    if(val1==1500 and val2==1500):
-        dt = "["+str(val1)+","+str(val2)+"]"
-        print(dt)
-        pub.publish(dt)
-        return
-    # map the val1 and val2 from 1000-2000 to 1500-1000
-    val1 = 1500 + (val1-1500)*-1
-    val2 = 1500 + (val2-1500)*-1
-    dt = "["+str(val1)+","+str(val2)+"]"
+    left_motor = int(4*(left_motor-1000)/10+1300)
+    right_motor = int(4*(right_motor-1000)/10+1300)
+
+
+    
+    
+    dt = "["+str(left_motor)+","+str(right_motor)+"]"
     print(dt)
     pub.publish(dt)
 def publish_data():
@@ -234,7 +246,7 @@ def arCode(msg):
         
     left = int(lst[0])
     right = int(lst[1])
-    global current_mode
+   
     current_mode = "arcode"
     pub.publish("["+str(left)+","+str(right)+"]")
     socketio.emit('rover',{
