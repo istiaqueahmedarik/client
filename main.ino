@@ -16,11 +16,11 @@ SabertoothSimplified ST;
 #include <sstream>
 #include <vector>
 ros::NodeHandle nh;
-
+unsigned long lastJoyStickCtrlTime = 0;
 // Callback function to handle incoming joystick messages
 void joystickCallback(const std_msgs::String &msg)
 {
-
+    lastJoyStickCtrlTime = millis();
     // Access the joystick data from the message
 
     // fl.data = msg.data;
@@ -70,6 +70,13 @@ void setup()
 
 void loop()
 {
+    unsigned long currentTime = millis();
+    if (currentTime - lastJoyStickCtrlTime > 500)
+    {
+
+        ST.motor(MOTOR1, 0);
+        ST.motor(MOTOR2, 0);
+    }
     // vals.publish(&vl);
     // pub.publish(&fl);
     nh.spinOnce();
