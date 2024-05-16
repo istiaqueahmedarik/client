@@ -23,10 +23,10 @@ void joystickCallback(const std_msgs::String &msg)
 
     // Access the joystick data from the message
 
-    fl.data = msg.data;
+    // fl.data = msg.data;
     std::string input = msg.data;
     std::vector<float> arr;
-    std::istringstream iss(input.s); // Remove the enclosing brackets
+    std::istringstream iss(input.substr(1, input.length() - 2)); // Remove the enclosing brackets
 
     int num;
     char delimiter;
