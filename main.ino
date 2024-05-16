@@ -1,5 +1,3 @@
-
-
 #include <ros.h>
 #include <std_msgs/String.h>
 #include <std_msgs/Int64.h>
@@ -25,9 +23,10 @@ void joystickCallback(const std_msgs::String &msg)
 
     // Access the joystick data from the message
 
+    fl.data = msg.data;
     std::string input = msg.data;
-    std::vector<int> arr;
-    std::istringstream iss(input.substr(1, input.length() - 2)); // Remove the enclosing brackets
+    std::vector<float> arr;
+    std::istringstream iss(input.s); // Remove the enclosing brackets
 
     int num;
     char delimiter;
@@ -36,14 +35,18 @@ void joystickCallback(const std_msgs::String &msg)
         arr.push_back(num);
         iss >> delimiter;
     }
+
     // // vl.data = arr[0];
     // float yu = arr[3];
     // float yl = arr[2];
     // // Set motor 1 to move forward at full speed
-    ST.motor(MOTOR1, arr[0]);
+    ST.motor(MOTOR1, constrain(map(arr[0], 1000, 2000, 127, -127), -127, 127));
+    ST.motor(MOTOR2, constrain(map(arr[1], 1000, 2000, 127, -127), -127, 127));
 
     // // Set motor 2 to move backward at full speed
-    ST.motor(MOTOR2, arr[1]);
+    // ST.motor(MOTOR2, yl);
+    // vl.data = yu;
+    // pub.publish(&msg);
 
     // Publish the new message
     while (!nh.connected())
@@ -53,8 +56,6 @@ void joystickCallback(const std_msgs::String &msg)
 }
 
 ros::Subscriber<std_msgs::String> joystickSub("joystick", &joystickCallback);
-// ros::Subscriber<std_msgs::String> pxstateSub("pxstate", &pxstateCallback);
-// ros::Subscriber<std_msgs::String> vstateSub("vstate", &vstateCallback);
 
 void setup()
 {
