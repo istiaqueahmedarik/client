@@ -38,7 +38,15 @@ def joystick_data(data):
         'message': 'Joystick data received',
     })
     lst = data.split(',')
-    pub.publish("["+str(lst[0])+","+str(lst[1])+"]")
+    p = "["
+    
+    for i in range(25):
+        if(i==24):
+            p = p+str(lst[i])
+        else:
+            p=p+str(lst[i])+","
+    p = p+"]"
+    pub.publish(p)
 
 def get_new_coordinates(lng,lat,dist,angle,curHeading):
     # dist is in meters
@@ -449,18 +457,18 @@ if __name__ == '__main__':
         f.write("")
     with open('currentIdx.txt', 'w') as f:
         f.write("0")
-    rospy.wait_for_service('mavros/set_mode')
-    set_mode_service = rospy.ServiceProxy('mavros/set_mode', SetMode)
-    response = set_mode_service(custom_mode='MANUAL')
-    print(response)
-    rospy.wait_for_service('mavros/cmd/arming')
-    arm_service = rospy.ServiceProxy('mavros/cmd/arming', CommandBool)
-    response = arm_service(False)
-    print(response)
-    rospy.wait_for_service('mavros/mission/clear')
-    clear_service = rospy.ServiceProxy('mavros/mission/clear', WaypointClear)
-    response = clear_service()
-    print(response)
+    # rospy.wait_for_service('mavros/set_mode')
+    # set_mode_service = rospy.ServiceProxy('mavros/set_mode', SetMode)
+    # response = set_mode_service(custom_mode='MANUAL')
+    # print(response)
+    # rospy.wait_for_service('mavros/cmd/arming')
+    # arm_service = rospy.ServiceProxy('mavros/cmd/arming', CommandBool)
+    # response = arm_service(False)
+    # print(response)
+    # rospy.wait_for_service('mavros/mission/clear')
+    # clear_service = rospy.ServiceProxy('mavros/mission/clear', WaypointClear)
+    # response = clear_service()
+    # print(response)
     waypoints.clear()
     pub_thread = threading.Thread(target=publish_data)
     pub_thread.start()
