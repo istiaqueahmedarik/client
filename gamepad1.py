@@ -11,8 +11,8 @@ sio = socketio.Client()
 
 DEADZONE = 50
 
-# sio.connect('http://192.168.1.111:5476')
-sio.connect('http://192.168.1.155:5476')
+sio.connect('http://192.168.1.111:5476')
+# sio.connect('http://192.168.1.155:5476')
 
 sio.on('connect', lambda: print('Connected to server'))
 sio.on('disconnect', lambda: print('Disconnected from server'))
@@ -20,42 +20,40 @@ sio.on('disconnect', lambda: print('Disconnected from server'))
 
 # waypoints = [] 
 def getMotorSpeed(x,y):
-    if(x>1400 and x<1000 and (y>1600 or y<1600)):
+    if(x>1400 and x<1600 and (y>1600 or y<1400)):
         return (y,y)
     elif(y>1400 and y<1600):
         return (x,3000-x)
-        
+    else:
+        l = int((((y-1500)*(x-1500))/500))
+        r = (y-l)
+        return (l,r)
     
 
-def calculate_motor_speeds(x, y):
-    # Normalize joystick inputs to range -1 to 1
-    normalized_x = (x - 1500) / 500
-    normalized_y = (y - 1500) / 500
+def joystick_to_motor_speed(x, y):
+    # if((x<1500+DEADZONE and x>1500-DEADZONE) or (y<1500+DEADZONE and y>1500-DEADZONE)):
+    #     left_motor = 1500
+    #     right_motor = 1500
+    #     return int(left_motor), int(right_motor)
+    # Normalize the joystick values
+    x_norm = (x - 1500) / 500
+    y_norm = (y - 1500) / 500
+    
+    # Calculate motor speeds
+    left_speed_norm = y_norm + x_norm
+    right_speed_norm = y_norm - x_norm
+    
+    # Rescale to motor speed range
+    left_speed = 1500 + 500 * left_speed_norm
+    right_speed = 1500 + 500 * right_speed_norm
+    
+    # Ensure the values are within the valid range
+    left_speed = max(1000, min(2000, left_speed))
+    right_speed = max(1000, min(2000, right_speed))
 
-    # Compute motor speeds in the normalized range
-    left_motor_speed = normalized_y + normalized_x
-    right_motor_speed = normalized_y - normalized_x
+    return int(left_speed), int(right_speed)
 
-    # Ensure motor speeds stay within the range -1 to 1
-    left_motor_speed = max(min(left_motor_speed, 1), -1)
-    right_motor_speed = max(min(right_motor_speed, 1), -1)
-
-    # Determine if the joystick is in a pure forward or backward position
-    is_forward_backward = abs(normalized_x) < 0.1
-
-    # Scale down the speeds based on distance from the center for diagonal movement
-    if not is_forward_backward:
-        scale_factor = max(abs(normalized_x), abs(normalized_y))
-        left_motor_speed *= (1 - 0.5 * scale_factor)
-        right_motor_speed *= (1 - 0.5 * scale_factor)
-
-    # Map normalized motor speeds to the range 1000 to 2000
-    left_motor = (left_motor_speed + 1) * 500 + 1000
-    right_motor = (right_motor_speed + 1) * 500 + 1000
-    if((left_motor<1500+DEADZONE and left_motor>1500-DEADZONE) or (right_motor<1500+DEADZONE and right_motor>1500-DEADZONE)):
-        left_motor = 1500
-        right_motor = 1500
-    return int(left_motor), int(right_motor)
+    
 
 def joystick():
     # rospy.init_node('joystickVal', anonymous=True)
@@ -115,7 +113,7 @@ def joystick():
 
 
         # print(f"leftY: {leftY}, leftX: {leftX}, rightY: {rightY}, rightX: {rightX}, arm: {arm}, speed_mode: {speed_mode}, arm_mode: {arm_mode}, lifter: {lifter}")
-        (leftMotor,rightMotor) = calculate_motor_speeds(rightX,rightY)
+        (leftMotor,rightMotor) = joystick_to_motor_speed(rightX,rightY)
         # s = str(23)+s
         s = "["
         s += str(leftMotor)+","
@@ -131,10 +129,10 @@ def joystick():
         s+=str(light)
         s+="]"
 
-
-        sio.emit('joystick_data', s)
+        if(arm==2000):
+            sio.emit('joystick_data', s)
         # left_motor,right_motor,leftX,leftY,DL,DR,DU,DD,LT,RT,B0,B1,B2,B3,B4,B5,B6,B7,B8,B9,B10
-        time.sleep(0.1)
+        time.sleep(0.2)
         # rate.sleep()
         # 15(B) 16(x) 17(y)
         # 11 (DR)

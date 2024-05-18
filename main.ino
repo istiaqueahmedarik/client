@@ -93,6 +93,7 @@ int mode = 1;
 // Callback function to handle incoming joystick messages
 void joystickCallback(const std_msgs::String &msg)
 {
+    nh.spinOnce();
     lastJoyStickCtrlTime = millis();
     // Access the joystick data from the message
 
@@ -114,11 +115,11 @@ void joystickCallback(const std_msgs::String &msg)
     // float yl = arr[2];
     // // Set motor 1 to move forward at full speed
 
-    int SPEED = 60;
+    int SPEED = 50;
     if (arr.size() >= 9)
     {
         if (arr[8] == 2000)
-            SPEED = 80;
+            SPEED = 70;
     }
 
     ST.motor(MOTOR2, constrain(map(arr[0], 1000, 2000, -SPEED, SPEED), -SPEED, SPEED));
@@ -167,16 +168,23 @@ void joystickCallback(const std_msgs::String &msg)
     // pub.publish(&msg);
 
     // Publish the new message
-    while (!nh.connected())
-    {
-        nh.spinOnce();
-    }
+    nh.spinOnce();
+    delay(0.01);
 }
 
 ros::Subscriber<std_msgs::String> joystickSub("joystick", &joystickCallback);
 
 void setup()
 {
+    nh.getHardware()->setBaud(57600);
+
+    int timeout_ms = 100;
+
+    Serial.setTimeout(timeout_ms);
+
+    Serial5.begin(9600);
+    Serial4.begin(9600);
+    Serial.begin(57600);
     stepper_setup();
     positions[0] = 0;
     positions[1] = 0;
@@ -187,8 +195,9 @@ void setup()
     // nh.subscribe(vstateSub);
     // nh.advertise(vals);
     // nh.advertise(pub);
-    Serial5.begin(9600);
-    Serial4.begin(9600);
+
+    nh.spinOnce();
+    delay(0.5);
 }
 
 void loop()
@@ -203,7 +212,6 @@ void loop()
         ST_ARM.motor(MOTOR1, 0);
         ST_ARM.motor(MOTOR2, 0);
     }
-    // vals.publish(&vl);
 
     HANDLE_LIFTER();
 
@@ -211,6 +219,8 @@ void loop()
     gripper();  // ch
 
     nh.spinOnce();
+    delay(0.01);
+
     // Add additional code here if needed
 }
 
@@ -237,6 +247,8 @@ void stepper_setup()
     stepperG.setAcceleration(500);
     stepperG.setSpeed(900000);
     stepperG.setMinPulseWidth(t);
+    nh.spinOnce();
+    delay(0.01);
 }
 
 void print_stepper_pos()
@@ -252,6 +264,8 @@ void print_stepper_pos()
     Serial.print("Stepper B position : ");
 
     Serial.println(stepperB.currentPosition());
+    nh.spinOnce();
+    delay(0.01);
 }
 
 void base_arm()
@@ -282,6 +296,8 @@ void base_arm()
         positions[0] = thrs_base_f;
     if (stepperB.currentPosition() <= thrs_base_b)
         positions[0] = thrs_base_b;
+    nh.spinOnce();
+    delay(0.01);
 }
 
 void fix()
@@ -296,6 +312,8 @@ void fix()
 
     stepperL.setCurrentPosition(0);
     stepperR.setCurrentPosition(0);
+    nh.spinOnce();
+    delay(0.01);
 }
 
 void HANDLE_LIFTER()
@@ -353,6 +371,8 @@ void HANDLE_LIFTER()
         Serial.println(positions[0]);
         Serial.println(positions[1]);
     }
+    nh.spinOnce();
+    delay(0.01);
 }
 void gripper()
 {
@@ -369,4 +389,6 @@ void gripper()
     stepperG.moveTo(m);
     stepperG.setSpeed(5000);
     stepperG.runSpeedToPosition();
+    nh.spinOnce();
+    delay(0.01);
 }

@@ -21,6 +21,7 @@ pull_srv = rospy.ServiceProxy('mavros/mission/pull', WaypointPull)
 waypoints = [] 
 
 pub = rospy.Publisher('joystick', String, queue_size=10)
+rospy.Rate(10)
 mode = rospy.Publisher('mode', String, queue_size=10)
 current_mode = "manual"
 @socketio.on('connect')
@@ -38,6 +39,7 @@ def joystick_data(data):
         'message': 'Joystick data received',
     })
     pub.publish(data)
+    rospy.sleep(0.1)
 
 def get_new_coordinates(lng,lat,dist,angle,curHeading):
     # dist is in meters
