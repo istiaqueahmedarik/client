@@ -71,10 +71,10 @@ long y = 0;
 int chVal[30] = {};
 
 AccelStepper stepperB(1, 34, 33); // pul // dir //base  chVal[9]   chVal[1 and 2] sabertooth
-AccelStepper stepperL(1, 7, 6);   // science L
-AccelStepper stepperR(1, 9, 8);   // science R // uporer ta
+AccelStepper stepperL(1, 36, 35); // science L
+AccelStepper stepperR(1, 38, 37); // science R // uporer ta
 
-AccelStepper stepperG(1, 5, 4); // gripper
+AccelStepper stepperG(1, 40, 39); // gripper// gripper
 // arm
 
 long positionss[] = {0, 0, 0, 0};
@@ -113,41 +113,49 @@ void joystickCallback(const std_msgs::String &msg)
     // float yu = arr[3];
     // float yl = arr[2];
     // // Set motor 1 to move forward at full speed
-    ST.motor(MOTOR2, constrain(map(arr[0], 1000, 2000, -80, 80), -80, 80));
-    ST.motor(MOTOR1, constrain(map(arr[1], 1000, 2000, -80, 80), -80, 80));
+
+    int SPEED = 60;
+    if (arr.size() >= 9)
+    {
+        if (arr[8] == 2000)
+            SPEED = 80;
+    }
+
+    ST.motor(MOTOR2, constrain(map(arr[0], 1000, 2000, -SPEED, SPEED), -SPEED, SPEED));
+    ST.motor(MOTOR1, constrain(map(arr[1], 1000, 2000, -SPEED, SPEED), -SPEED, SPEED));
 
     if (arr.size() > 2)
     {
-        ST_ARM.motor(1, constrain(map(arr[4], 1000, 2000, 100, -100), -100, 100));
-        ST_ARM.motor(2, constrain(map(arr[5], 1000, 2000, 100, -100), -100, 100));
+        ST_ARM.motor(1, constrain(map(arr[2], 1000, 2000, 100, -100), -100, 100));
+        ST_ARM.motor(2, constrain(map(arr[3], 1000, 2000, 100, -100), -100, 100));
     }
-    if (arr.size() >= 12)
+    if (arr.size() >= 5)
     {
 
-        chVal[9] = arr[11];
+        chVal[9] = arr[4];
     }
-    if (arr.size() >= 9)
+    if (arr.size() >= 6)
     {
 
-        chVal[10] = arr[8];
+        chVal[10] = arr[5];
     }
-    if (arr.size() >= 14)
+    if (arr.size() >= 7)
     {
 
-        chVal[5] = arr[13];
+        chVal[5] = arr[6];
     }
 
-    if (arr.size() >= 18)
+    if (arr.size() >= 8)
     {
-        if (arr[16] == 2000)
+        if (arr[7] == 1500)
         {
             mode = 1;
         }
-        else if (arr[17] == 2000)
+        else if (arr[7] == 1000)
         {
             mode = 2;
         }
-        else if (arr[15] == 2000)
+        else if (arr[7] == 2000)
         {
             mode = 3;
         }

@@ -37,16 +37,7 @@ def joystick_data(data):
     socketio.emit('rover',{
         'message': 'Joystick data received',
     })
-    lst = data.split(',')
-    p = "["
-    
-    for i in range(25):
-        if(i==24):
-            p = p+str(lst[i])
-        else:
-            p=p+str(lst[i])+","
-    p = p+"]"
-    pub.publish(p)
+    pub.publish(data)
 
 def get_new_coordinates(lng,lat,dist,angle,curHeading):
     # dist is in meters
